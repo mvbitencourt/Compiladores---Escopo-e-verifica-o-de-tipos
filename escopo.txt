@@ -1,6 +1,11 @@
-BLOCO _principal_
 NUMERO a = 10
-CADEIA z = 'Compiladores'
-NUMERO b = 10, c = 9
-PRINT b, a, c, z
+BLOCO _principal_
+NUMERO a = 10, b, c 
+CADEIA z = "Compila"
+PRINT a, b, c, z
+BLOCO n1
+NUMERO a = 20
+PRINT a
+FIM n1
 FIM _principal_
+PRINT a

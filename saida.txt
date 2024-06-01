@@ -1,4 +1,7 @@
+Erro linha 0, declaracao de variavel fora de bloco
 10
+None
+None
+"Compila"
 10
-9
-'Compiladores'
+Erro linha 10, declaracao de variavel fora de bloco
