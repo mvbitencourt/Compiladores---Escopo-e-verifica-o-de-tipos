@@ -1,0 +1,1 @@
+# Compiladores---Escopo-e-verifica-o-de-tipos
