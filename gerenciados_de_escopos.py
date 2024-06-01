@@ -107,7 +107,7 @@ def extrair_variavel_atribuicao(linha):
 
 def extrair_variaveis_tipos_valores_declaracao(linha):
     tipo_variavel = extrair_tipo_variavel_declaracao(linha)
-    if tipo_variavel is -1:
+    if tipo_variavel == -1:
         raise ValueError("Tipo de variável não reconhecido na linha: " + linha)
     
     variaveis_tipos_valores = []
@@ -132,7 +132,7 @@ def extrair_variaveis_tipos_valores_declaracao(linha):
 
 def extrair_variaveis_tipos_valores_atribuicao(linha):
     variavel = extrair_variavel_atribuicao(linha)
-    if variavel is -1:
+    if variavel == -1:
         raise ValueError("variável não reconhecido na linha: " + linha)
     
     variaveis_tipos_valores = []
@@ -175,14 +175,27 @@ def verificar_declaracao_variavel(linha, pilha):
     nome_variavel = linha.split('=')[0].strip()
     
     # Procurar na pilha se a variável foi declarada
-    for escopo in reversed(pilha):
-        if nome_variavel in escopo:
-            return escopo[nome_variavel]
+    for tabela in reversed(pilha):
+        for simbolo in tabela:
+            if simbolo[1] == nome_variavel:
+                return simbolo
+    return False
+
+def atribuir_valor_variavel(linha, pilha):
+    # Separar a variável e o novo valor
+    nome_variavel, novo_valor = map(str.strip, linha.split('='))
+    
+    # Procurar na pilha a variável e atualizar seu valor
+    for tabela in reversed(pilha):
+        for indice, simbolo in enumerate(tabela):
+            if simbolo[1] == nome_variavel:
+                tabela[indice][3] = novo_valor
+                return True
     return False
 
 def atualiza_tabela_simbolos(linha, tabela_simbolos):
     variaveis_tipos_valores = extrair_variaveis_tipos_valores_atribuicao(linha)
-    for variavel, tipo_variavel, valor in variaveis_tipos_valores:
+    for token, variavel, tipo_variavel, valor in variaveis_tipos_valores:
         encontrado = False
         for simbolo in tabela_simbolos:
             if simbolo[0] == variavel:
@@ -224,12 +237,6 @@ def atualizar_pilha(pilha, tabela_simbolos):
         pilha[-1] = tabela_simbolos  # Atualiza a pilha com a versão mais recente da tabela
     return pilha
 
-def pilha_vazia(pilha):
-    if len(pilha) == 0:
-        return True
-    else:
-        return False
-
 def imprimir_em_arquivo(cadeia, arquivo_saida):
     with open(arquivo_saida, "a") as arquivo:
         arquivo.write(str(cadeia) + "\n")
@@ -260,38 +267,40 @@ def main():
             
             if token_gerado != -1:
                 if token_gerado  == "tk_bloco_inicio":
+                    tabela_simbolos = []
                     pilha.append(tabela_simbolos)
                 if token_gerado  == "tk_bloco_fim":
                     pilha.pop()
                 if token_gerado in tokens_declaracao:
-                    if pilha_vazia(pilha):
+                    if len(pilha) < 1:
                         imprimir_em_arquivo("Erro linha " + str(index_linha) + ", declaracao de variavel fora de bloco", arquivo_saida)
                     else: 
-                        escopos_variaveis = extrair_variaveis_tipos_valores_declaracao(linha)
-                        for escopo in escopos_variaveis:
-                            tabela_simbolos.append(escopo)
+                        if verificar_declaracao_variavel(linha, pilha) == False:
+                            escopos_variaveis = extrair_variaveis_tipos_valores_declaracao(linha)
+                            for escopo in escopos_variaveis:
+                                tabela_simbolos.append(escopo)
+                        #else:
+                            
                 elif token_gerado in tokens_atribuicao:
-                    if pilha_vazia(pilha):
+                    if len(pilha) < 1:
                         imprimir_em_arquivo("Erro linha " + str(index_linha) + ", atribuicao de variavel fora de bloco", arquivo_saida)
                     else:
                         if verificar_declaracao_variavel(linha, pilha) != False:
-                            escopo_variavel = verificar_declaracao_variavel(linha, pilha)
-                            print(escopo_variavel)
-                            tabela_nova = atualiza_tabela_simbolos(linha, tabela_simbolos)
-                            if tabela_nova != -1 and tabela_nova != -2:
-                                tabela_simbolos = tabela_nova
+                            atribuir_valor_variavel(linha, pilha)
                         else:
                             imprimir_em_arquivo("Erro linha " + str(index_linha) + ", variavel nao declarada", arquivo_saida)
                 elif token_gerado == "tk_print":
-                    if pilha_vazia(pilha):
+                    if len(pilha) < 1:
                         imprimir_em_arquivo("Erro linha " + str(index_linha) + ", declaracao de variavel fora de bloco", arquivo_saida)
                     else:
                         variaveis_print = extrair_variaveis_print(linha)
                         for variavel in variaveis_print:
                             valor_variavel = obter_valor_variavel(variavel, pilha)
-                            imprimir_em_arquivo(valor_variavel, arquivo_saida)
-        
-            linhas.append([index_linha, linha, erro])
+                            if valor_variavel != -1:
+                                imprimir_em_arquivo(valor_variavel, arquivo_saida)
+                            else:
+                                imprimir_em_arquivo("Erro linha " + str(index_linha) + ", variavel nao declarada", arquivo_saida)
+                            
             print(f"PILHA: {pilha}")
 
 main()
