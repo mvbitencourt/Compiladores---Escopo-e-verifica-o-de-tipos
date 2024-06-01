@@ -1,0 +1,6 @@
+BLOCO _principal_
+NUMERO a = 10
+CADEIA z = 'Compiladores'
+NUMERO b = 10, c = 9
+PRINT b, a, c, z
+FIM _principal_
