@@ -4,30 +4,29 @@ comandos = ["BLOCO", "FIM", "NUMERO", "CADEIA", "PRINT"]
 
 # Dicionário de Expressões Regulares
 ER_DICIONARIO = {
-    # Expressões regulares definidas
-    "ER_BLOCO_INICIO": r"BLOCO \w+",               # Corresponde ao início de um bloco 
-    "ER_BLOCO_FIM": r"FIM \w+",                 # Corresponde ao fim de um bloco 
-    "ER_TIPO_NUMERO": r"NUMERO",                   # Corresponde ao tipo NUMERO
-    "ER_TIPO_CADEIA": r"CADEIA",                   # Corresponde ao tipo CADEIA
-    "ER_IDENTIFICADOR": r"[a-zA-Z_][a-zA-Z0-9_]*", # Corresponde a identificadores de variáveis
-    "ER_NUMERO": r"[+-]?\d+(\.\d+)?",              # Corresponde a números inteiros ou reais
-    "ER_CADEIA": r'"([^"]*)"',                     # Corresponde a cadeias de caracteres entre aspas duplas
+    "ER_BLOCO_INICIO": r"\s*BLOCO \w+",  # Corresponde ao início de um bloco com qualquer palavra e espaços no início
+    "ER_BLOCO_FIM": r"\s*FIM \w+",       # Corresponde ao fim de um bloco com qualquer palavra e espaços no início
+    "ER_TIPO_NUMERO": r"\s*NUMERO",      # Corresponde ao tipo NUMERO com espaços no início
+    "ER_TIPO_CADEIA": r"\s*CADEIA",      # Corresponde ao tipo CADEIA com espaços no início
+    "ER_IDENTIFICADOR": r"\s*[a-zA-Z_][a-zA-Z0-9_]*",  # Corresponde a identificadores de variáveis com espaços no início
+    "ER_NUMERO": r"\s*[+-]?\d+(\.\d+)?",  # Corresponde a números inteiros ou reais com espaços no início
+    "ER_CADEIA": r'\s*"([^"]*)"',         # Corresponde a cadeias de caracteres entre aspas duplas com espaços no início
 
     # Declarações de variáveis tipo NUMERO
-    "ER_DECLARACAO_NUMERO": fr"NUMERO\s+{r'[a-zA-Z_][a-zA-Z0-9_]*'}(,\s*{r'[a-zA-Z_][a-zA-Z0-9_]*'})*",  # Declaração de variáveis NUMERO sem inicialização
-    "ER_DECLARACAO_NUMERO_INICIALIZADA": fr"NUMERO\s+({r'[a-zA-Z_][a-zA-Z0-9_]*'}\s*=\s*{r'[+-]?\d+(\.\d+)?'}\s*,\s*)*{r'[a-zA-Z_][a-zA-Z0-9_]*'}\s*=\s*{r'[+-]?\d+(\.\d+)?'}",  # Declaração de variáveis NUMERO com inicialização
+    "ER_DECLARACAO_NUMERO": fr"\s*NUMERO\s*{r'[a-zA-Z_][a-zA-Z0-9_]*'}(,\s*{r'[a-zA-Z_][a-zA-Z0-9_]*'})*",  # Declaração de variáveis NUMERO sem inicialização com espaços no início
+    "ER_DECLARACAO_NUMERO_INICIALIZADA": fr"\s*NUMERO\s*({r'[a-zA-Z_][a-zA-Z0-9_]*'}\s*=\s*{r'[+-]?\d+(\.\d+)?'}\s*,\s*)*{r'[a-zA-Z_][a-zA-Z0-9_]*'}\s*=\s*{r'[+-]?\d+(\.\d+)?'}",  # Declaração de variáveis NUMERO com inicialização com espaços no início
 
     # Declarações de variáveis tipo CADEIA
-    "ER_DECLARACAO_CADEIA": fr"CADEIA\s+{r'[a-zA-Z_][a-zA-Z0-9_]*'}(,\s*{r'[a-zA-Z_][a-zA-Z0-9_]*'})*",  # Declaração de variáveis CADEIA sem inicialização
-    "ER_DECLARACAO_CADEIA_INICIALIZADA": fr"CADEIA\s+({r'[a-zA-Z_][a-zA-Z0-9_]*'}\s*=\s*{r'\"([^"]*)\"'}\s*,\s*)*{r'[a-zA-Z_][a-zA-Z0-9_]*'}\s*=\s*{r'\"([^"]*)\"'}",  # Declaração de variáveis CADEIA com inicialização
+    "ER_DECLARACAO_CADEIA": fr"\s*CADEIA\s*{r'[a-zA-Z_][a-zA-Z0-9_]*'}(,\s*{r'[a-zA-Z_][a-zA-Z0-9_]*'})*",  # Declaração de variáveis CADEIA sem inicialização com espaços no início
+    "ER_DECLARACAO_CADEIA_INICIALIZADA": fr"\s*CADEIA\s*({r'[a-zA-Z_][a-zA-Z0_]*'}\s*=\s*{r'\"([^"]*)\"'}\s*,\s*)*{r'[a-zA-Z_][a-zA-Z0_]*'}\s*=\s*{r'\"([^"]*)\"'}",  # Declaração de variáveis CADEIA com inicialização com espaços no início
 
     # Atribuições de variáveis
-    "ER_ATRIBUICAO_NUMERO": fr"{r'[a-zA-Z_][a-zA-Z0-9_]*'}\s*=\s*{r'[+-]?\d+(\.\d+)?'}",  # Atribuição de um número a uma variável
-    "ER_ATRIBUICAO_CADEIA": fr"{r'[a-zA-Z_][a-zA-Z0-9_]*'}\s*=\s*{r'\"([^"]*)\"'}",  # Atribuição de uma cadeia a uma variável
-    "ER_ATRIBUICAO_VARIAVEL": fr"{r'[a-zA-Z_][a-zA-Z0-9_]*'}\s*=\s*{r'[a-zA-Z_][a-zA-Z0-9_]*'}",  # Atribuição de uma variável a outra variável
+    "ER_ATRIBUICAO_NUMERO": fr"\s*{r'[a-zA-Z_][a-zA-Z0-9_]*'}\s*=\s*{r'[+-]?\d+(\.\d+)?'}",  # Atribuição de um número a uma variável com espaços no início
+    "ER_ATRIBUICAO_CADEIA": fr"\s*{r'[a-zA-Z_][a-zA-Z0-9_]*'}\s*=\s*{r'\"([^"]*)\"'}",  # Atribuição de uma cadeia a uma variável com espaços no início
+    "ER_ATRIBUICAO_VARIAVEL": fr"\s*{r'[a-zA-Z_][a-zA-Z0-9_]*'}\s*=\s*{r'[a-zA-Z_][a-zA-Z0-9_]*'}",  # Atribuição de uma variável a outra variável com espaços no início
 
     # Comandos PRINT
-    "ER_PRINT": fr"PRINT\s+{r'[a-zA-Z_][a-zA-Z0-9_]*'}"    # Corresponde ao comando PRINT
+    "ER_PRINT": fr"\s*PRINT\s*{r'[a-zA-Z_][a-zA-Z0-9_]*'}"  # Corresponde ao comando PRINT com espaços no início
 }
 
 # Lista de Tokens
@@ -108,7 +107,7 @@ def extrair_variavel_atribuicao(linha):
 def extrair_variaveis_tipos_valores_declaracao(linha):
     tipo_variavel = extrair_tipo_variavel_declaracao(linha)
     if tipo_variavel == -1:
-        raise ValueError("Tipo de variável não reconhecido na linha: " + linha)
+        return -1
     
     variaveis_tipos_valores = []
 
@@ -189,6 +188,19 @@ def verificar_declaracao_variavel(linha, pilha):
                 return simbolo
     return False
 
+def verificar_declaracao_no_escopo_atual(variavel, pilha):
+    if not pilha:
+        return False
+    
+    escopo_atual = pilha[-1]
+    print("ESCPO ATUAL")
+    print(escopo_atual)
+    for simbolo in escopo_atual:
+        if simbolo[1] == variavel:
+            return True
+    
+    return False
+
 def atribuir_valor_variavel(linha, pilha, token):
     if token != 'tk_atribuicao_variavel':
         # Separar a variável e o novo valor
@@ -263,16 +275,16 @@ def atualizar_pilha(pilha, tabela_simbolos):
         pilha[-1] = tabela_simbolos  # Atualiza a pilha com a versão mais recente da tabela
     return pilha
 
-def imprimir_em_arquivo(cadeia, arquivo_saida):
+def imprimir_em_arquivo(cadeia, arquivo_saida, index_linha):
     with open(arquivo_saida, "a") as arquivo:
-        arquivo.write(str(cadeia) + "\n")
+        arquivo.write( f"[{index_linha + 1}] " + str(cadeia) + "\n")
         
 def limpar_arquivo_saida(arquivo_saida):
     with open(arquivo_saida, 'w') as arquivo:
         arquivo.write("")
 
 def main():
-    nome_arquivo = "escopo.txt" # Nome do arquivo a ser lido
+    nome_arquivo = "escopo1.txt" # Nome do arquivo a ser lido
     arquivo_saida = "saida.txt"
     linhas = [] # Inicializa uma lista vazia para armazenar as linhas
     index_linha = -1
@@ -285,6 +297,7 @@ def main():
 
     with open(nome_arquivo, 'r') as arquivo:
         for linha in arquivo:
+            linha = linha.lstrip()
             index_linha += 1
 
             token_gerado = verifica_token(linha)
@@ -299,39 +312,41 @@ def main():
                     pilha.pop()
                 if token_gerado in tokens_declaracao:
                     if len(pilha) < 1:
-                        imprimir_em_arquivo("Erro linha " + str(index_linha) + ", declaracao de variavel fora de bloco", arquivo_saida)
+                        imprimir_em_arquivo("Erro linha " + str(index_linha + 1) + ", declaracao de variavel fora de bloco", arquivo_saida, index_linha)
                     else: 
-                        if verificar_declaracao_variavel(linha, pilha) == False:
-                            escopos_variaveis = extrair_variaveis_tipos_valores_declaracao(linha)
+                        #if verificar_declaracao_variavel(linha, pilha) == False:
+                        escopos_variaveis = extrair_variaveis_tipos_valores_declaracao(linha)
+                        print("ESCOPO:")
+                        print(escopos_variaveis)
+                        if escopos_variaveis != -1:
                             for escopo in escopos_variaveis:
-                                tabela_simbolos.append(escopo)
-                        #else:
-                            
+                                if verificar_declaracao_no_escopo_atual(escopo[1], pilha) != True:
+                                    tabela_simbolos.append(escopo)
+                                else:
+                                    imprimir_em_arquivo("Erro linha " + str(index_linha + 1) + ", variavel ja declarada no bloco", arquivo_saida, index_linha)
+                                    
                 elif token_gerado in tokens_atribuicao:
                     if len(pilha) < 1:
-                        imprimir_em_arquivo("Erro linha " + str(index_linha) + ", atribuicao de variavel fora de bloco", arquivo_saida)
+                        imprimir_em_arquivo("Erro linha " + str(index_linha + 1) + ", atribuicao de variavel fora de bloco", arquivo_saida, index_linha)
                     else:
                         if verificar_declaracao_variavel(linha, pilha) != False:
                             variavel = verificar_declaracao_variavel(linha, pilha)
-                            tipo_variavel = variavel[2]
                             retorno_atribuicao = atribuir_valor_variavel(linha, pilha, token_gerado)
-                            print("RETORNO:")
-                            print(retorno_atribuicao)
                             if retorno_atribuicao == -1:
-                                imprimir_em_arquivo("Erro linha " + str(index_linha) + ", tipos nao compativeis", arquivo_saida)
+                                imprimir_em_arquivo("Erro linha " + str(index_linha + 1) + ", tipos nao compativeis", arquivo_saida, index_linha)
                         else:
-                            imprimir_em_arquivo("Erro linha " + str(index_linha) + ", variavel nao declarada", arquivo_saida)
+                            imprimir_em_arquivo("Erro linha " + str(index_linha + 1) + ", variavel nao declarada", arquivo_saida, index_linha)
                 elif token_gerado == "tk_print":
                     if len(pilha) < 1:
-                        imprimir_em_arquivo("Erro linha " + str(index_linha) + ", declaracao de variavel fora de bloco", arquivo_saida)
+                        imprimir_em_arquivo("Erro linha " + str(index_linha + 1) + ", declaracao de variavel fora de bloco", arquivo_saida, index_linha)
                     else:
                         variaveis_print = extrair_variaveis_print(linha)
                         for variavel in variaveis_print:
                             valor_variavel = obter_valor_variavel(variavel, pilha)
                             if valor_variavel != -1:
-                                imprimir_em_arquivo(valor_variavel, arquivo_saida)
+                                imprimir_em_arquivo(valor_variavel, arquivo_saida, index_linha)
                             else:
-                                imprimir_em_arquivo("Erro linha " + str(index_linha) + ", variavel nao declarada", arquivo_saida)
+                                imprimir_em_arquivo("Erro linha " + str(index_linha + 1) + ", variavel nao declarada", arquivo_saida, index_linha)
                             
             print(f"PILHA: {pilha}")
 
