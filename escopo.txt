@@ -1,16 +1,40 @@
-BLOCO _principal_
-NUMERO a
-BLOCO n1
+BLOCO _principal_ 
+NUMERO a = 10, b = 20 
+CADEIA x
+
+PRINT b 
 PRINT a
-NUMERO b
-BLOCO n2
-PRINT b
-NUMERO c
-c=1
-BLOCO n3
+x= "Ola mundo"
+x=a 
+PRINT x
+BLOCO _n1_ 
+CADEIA a = "Compiladores" 
+NUMERO c 
+c=-0.45 
+PRINT b 
+PRINT c 
+FIM _n1_
+
+BLOCO _n2_ 
+CADEIA b = "Compiladores" 
+PRINT a 
+PRINT b 
+a=11
+CADEIA a= "Bloco2"
+PRINT a 
 PRINT c
-FIM n1
-FIM n2
+BLOCO _n3_ 
+NUMERO a=-0.28, c
+PRINT a 
+PRINT b 
+PRINT c 
+c=a
 PRINT c
-FIM n3
+a=40
+PRINT a
+print c
+FIM _n3_ 
+FIM _n2_ 
+PRINT c 
+PRINT a
 FIM _principal_

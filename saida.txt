@@ -1,4 +1,17 @@
-None
-None
-1
-Erro linha 13, variavel nao declarada
+[5] 20
+[6] 10
+[8] Erro linha 8, tipos nao compativeis
+[9] "Ola mundo"
+[14] 20
+[15] -0.45
+[20] 10
+[21] "Compiladores"
+[24] "Bloco2"
+[25] Erro linha 25, variavel nao declarada
+[28] -0.28
+[29] "Compiladores"
+[30] None
+[32] -0.28
+[34] 40
+[38] Erro linha 38, variavel nao declarada
+[39] 11

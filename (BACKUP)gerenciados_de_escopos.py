@@ -170,6 +170,14 @@ def obter_valor_variavel(variavel, pilha):
                     return linha[3]
     return -1
 
+def obter_tipo_variavel(variavel, pilha):
+    for tabela in reversed(pilha):
+        for linha in tabela:
+            for simbolo in linha:
+                if simbolo == variavel:
+                    return linha[2]
+    return -1
+
 def verificar_declaracao_variavel(linha, pilha):
     # Separar o nome da variável
     nome_variavel = linha.split('=')[0].strip()
@@ -181,16 +189,34 @@ def verificar_declaracao_variavel(linha, pilha):
                 return simbolo
     return False
 
-def atribuir_valor_variavel(linha, pilha):
-    # Separar a variável e o novo valor
-    nome_variavel, novo_valor = map(str.strip, linha.split('='))
-    
-    # Procurar na pilha a variável e atualizar seu valor
-    for tabela in reversed(pilha):
-        for indice, simbolo in enumerate(tabela):
-            if simbolo[1] == nome_variavel:
-                tabela[indice][3] = novo_valor
-                return True
+def atribuir_valor_variavel(linha, pilha, token):
+    if token != 'tk_atribuicao_variavel':
+        # Separar a variável e o novo valor
+        nome_variavel, novo_valor = map(str.strip, linha.split('='))
+        
+        # Procurar na pilha a variável e atualizar seu valor
+        for tabela in reversed(pilha):
+            for indice, simbolo in enumerate(tabela):
+                if simbolo[1] == nome_variavel:
+                    tabela[indice][3] = novo_valor
+                    return True
+    else:
+        # Separar a variável e o novo valor
+        nome_variavel, novo_valor = map(str.strip, linha.split('='))
+        novo_valor = obter_valor_variavel(novo_valor, pilha)
+        tipo_novo_valor = obter_tipo_variavel(novo_valor, pilha)
+        
+        # Procurar na pilha a variável e atualizar seu valor
+        for tabela in reversed(pilha):
+            for indice, simbolo in enumerate(tabela):
+                if simbolo[1] == nome_variavel:
+                    if simbolo[2] == tipo_novo_valor:
+                        tabela[indice][3] = novo_valor
+                        return True
+                    else:
+                        return -1
+
+        
     return False
 
 def atualiza_tabela_simbolos(linha, tabela_simbolos):
@@ -286,7 +312,13 @@ def main():
                         imprimir_em_arquivo("Erro linha " + str(index_linha) + ", atribuicao de variavel fora de bloco", arquivo_saida)
                     else:
                         if verificar_declaracao_variavel(linha, pilha) != False:
-                            atribuir_valor_variavel(linha, pilha)
+                            variavel = verificar_declaracao_variavel(linha, pilha)
+                            tipo_variavel = variavel[2]
+                            retorno_atribuicao = atribuir_valor_variavel(linha, pilha, token_gerado)
+                            print("RETORNO:")
+                            print(retorno_atribuicao)
+                            if retorno_atribuicao == -1:
+                                imprimir_em_arquivo("Erro linha " + str(index_linha) + ", tipos nao compativeis", arquivo_saida)
                         else:
                             imprimir_em_arquivo("Erro linha " + str(index_linha) + ", variavel nao declarada", arquivo_saida)
                 elif token_gerado == "tk_print":

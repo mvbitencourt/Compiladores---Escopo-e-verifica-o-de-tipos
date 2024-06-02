@@ -170,6 +170,14 @@ def obter_valor_variavel(variavel, pilha):
                     return linha[3]
     return -1
 
+def obter_tipo_variavel(variavel, pilha):
+    for tabela in reversed(pilha):
+        for linha in tabela:
+            for simbolo in linha:
+                if simbolo == variavel:
+                    return linha[2]
+    return -1
+
 def verificar_declaracao_variavel(linha, pilha):
     # Separar o nome da variável
     nome_variavel = linha.split('=')[0].strip()
@@ -181,16 +189,34 @@ def verificar_declaracao_variavel(linha, pilha):
                 return simbolo
     return False
 
-def atribuir_valor_variavel(linha, pilha):
-    # Separar a variável e o novo valor
-    nome_variavel, novo_valor = map(str.strip, linha.split('='))
-    
-    # Procurar na pilha a variável e atualizar seu valor
-    for tabela in reversed(pilha):
-        for indice, simbolo in enumerate(tabela):
-            if simbolo[1] == nome_variavel:
-                tabela[indice][3] = novo_valor
-                return True
+def atribuir_valor_variavel(linha, pilha, token):
+    if token != 'tk_atribuicao_variavel':
+        # Separar a variável e o novo valor
+        nome_variavel, novo_valor = map(str.strip, linha.split('='))
+        
+        # Procurar na pilha a variável e atualizar seu valor
+        for tabela in reversed(pilha):
+            for indice, simbolo in enumerate(tabela):
+                if simbolo[1] == nome_variavel:
+                    tabela[indice][3] = novo_valor
+                    return True
+    else:
+        # Separar a variável e o novo valor
+        nome_variavel, novo_valor = map(str.strip, linha.split('='))
+        novo_valor = obter_valor_variavel(novo_valor, pilha)
+        tipo_novo_valor = obter_tipo_variavel(novo_valor, pilha)
+        
+        # Procurar na pilha a variável e atualizar seu valor
+        for tabela in reversed(pilha):
+            for indice, simbolo in enumerate(tabela):
+                if simbolo[1] == nome_variavel:
+                    if simbolo[2] == tipo_novo_valor:
+                        tabela[indice][3] = novo_valor
+                        return True
+                    else:
+                        return -1
+
+        
     return False
 
 def atualiza_tabela_simbolos(linha, tabela_simbolos):
@@ -237,9 +263,9 @@ def atualizar_pilha(pilha, tabela_simbolos):
         pilha[-1] = tabela_simbolos  # Atualiza a pilha com a versão mais recente da tabela
     return pilha
 
-def imprimir_em_arquivo(cadeia, arquivo_saida):
+def imprimir_em_arquivo(cadeia, arquivo_saida, index_linha):
     with open(arquivo_saida, "a") as arquivo:
-        arquivo.write(str(cadeia) + "\n")
+        arquivo.write( f"[{index_linha + 1}] " + str(cadeia) + "\n")
         
 def limpar_arquivo_saida(arquivo_saida):
     with open(arquivo_saida, 'w') as arquivo:
@@ -273,7 +299,7 @@ def main():
                     pilha.pop()
                 if token_gerado in tokens_declaracao:
                     if len(pilha) < 1:
-                        imprimir_em_arquivo("Erro linha " + str(index_linha) + ", declaracao de variavel fora de bloco", arquivo_saida)
+                        imprimir_em_arquivo("Erro linha " + str(index_linha + 1) + ", declaracao de variavel fora de bloco", arquivo_saida, index_linha)
                     else: 
                         if verificar_declaracao_variavel(linha, pilha) == False:
                             escopos_variaveis = extrair_variaveis_tipos_valores_declaracao(linha)
@@ -283,23 +309,29 @@ def main():
                             
                 elif token_gerado in tokens_atribuicao:
                     if len(pilha) < 1:
-                        imprimir_em_arquivo("Erro linha " + str(index_linha) + ", atribuicao de variavel fora de bloco", arquivo_saida)
+                        imprimir_em_arquivo("Erro linha " + str(index_linha + 1) + ", atribuicao de variavel fora de bloco", arquivo_saida, index_linha)
                     else:
                         if verificar_declaracao_variavel(linha, pilha) != False:
-                            atribuir_valor_variavel(linha, pilha)
+                            variavel = verificar_declaracao_variavel(linha, pilha)
+                            tipo_variavel = variavel[2]
+                            retorno_atribuicao = atribuir_valor_variavel(linha, pilha, token_gerado)
+                            print("RETORNO:")
+                            print(retorno_atribuicao)
+                            if retorno_atribuicao == -1:
+                                imprimir_em_arquivo("Erro linha " + str(index_linha + 1) + ", tipos nao compativeis", arquivo_saida, index_linha)
                         else:
-                            imprimir_em_arquivo("Erro linha " + str(index_linha) + ", variavel nao declarada", arquivo_saida)
+                            imprimir_em_arquivo("Erro linha " + str(index_linha + 1) + ", variavel nao declarada", arquivo_saida, index_linha)
                 elif token_gerado == "tk_print":
                     if len(pilha) < 1:
-                        imprimir_em_arquivo("Erro linha " + str(index_linha) + ", declaracao de variavel fora de bloco", arquivo_saida)
+                        imprimir_em_arquivo("Erro linha " + str(index_linha + 1) + ", declaracao de variavel fora de bloco", arquivo_saida, index_linha)
                     else:
                         variaveis_print = extrair_variaveis_print(linha)
                         for variavel in variaveis_print:
                             valor_variavel = obter_valor_variavel(variavel, pilha)
                             if valor_variavel != -1:
-                                imprimir_em_arquivo(valor_variavel, arquivo_saida)
+                                imprimir_em_arquivo(valor_variavel, arquivo_saida, index_linha)
                             else:
-                                imprimir_em_arquivo("Erro linha " + str(index_linha) + ", variavel nao declarada", arquivo_saida)
+                                imprimir_em_arquivo("Erro linha " + str(index_linha + 1) + ", variavel nao declarada", arquivo_saida, index_linha)
                             
             print(f"PILHA: {pilha}")
 
