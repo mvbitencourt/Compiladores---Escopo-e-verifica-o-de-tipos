@@ -62,8 +62,7 @@ tokens_atribuicao = [
             "tk_atribuicao_variavel",
 ]
 
-def converte_token_valor_para_tipo(valor):
-    print(valor)
+def converte_token_valor_para_tipo(valor, pilha):
     # Lista de expressões regulares ordenadas pela prioridade de verificação
     ordem_prioridade = [
         "ER_DECLARACAO_NUMERO_INICIALIZADA",
@@ -94,10 +93,11 @@ def converte_token_valor_para_tipo(valor):
                     elif nome_ER == "ER_CADEIA":
                         return tokens[3][0]
                     elif nome_ER == "ER_IDENTIFICADOR":
-                        tipo = extrair_tipo_variavel(valor)
-                        print("TIPOOOOOOO")
-                        print(tipo)
-                        return 
+                        tipo = extrair_tipo_variavel(valor, pilha)
+                        if tipo == "NUMERO":
+                            return tokens[2][0]
+                        elif tipo == "CADEIA":
+                            return tokens[3][0]
                     return token[0]
     return -1
 
@@ -136,11 +136,13 @@ def extrair_tipo_variavel_declaracao(linha):
         return tipo_variavel
     return -1
 
-def extrair_tipo_variavel(variavel):
-    variavel_declarada = verificar_declaracao_variavel(variavel)
-    print("TIPOOOOOOOOO:")
-    print(variavel_declarada)
-    return variavel_declarada
+def extrair_tipo_variavel(variavel, pilha):
+    
+    for tabela in reversed(pilha):
+        for simbolo in tabela:
+            if simbolo[1] == variavel:
+                return simbolo[2]
+    return False
 
 # EXCLUIR
 def extrair_variavel_atribuicao(linha):
@@ -222,7 +224,7 @@ def verificar_declaracao_no_escopo_atual(variavel, pilha):
     escopo_atual = pilha[-1]
     for simbolo in escopo_atual:
         if simbolo[1] == variavel:
-            return True
+            return simbolo
     
     return False
 
@@ -285,7 +287,7 @@ def limpar_arquivo_saida(arquivo_saida):
         arquivo.write("")
 
 def main():
-    nome_arquivo = "escopo.txt" # Nome do arquivo a ser lido
+    nome_arquivo = "escopo1.txt" # Nome do arquivo a ser lido
     arquivo_saida = "saida.txt"
     linhas = [] # Inicializa uma lista vazia para armazenar as linhas
     index_linha = -1
@@ -298,13 +300,12 @@ def main():
 
     with open(nome_arquivo, 'r') as arquivo:
         for linha in arquivo:
-            print(linha)
             linha = linha.lstrip()
             index_linha += 1
 
             token_gerado = verifica_token_linha(linha)
             
-            print(f"[{index_linha + 1}] {token_gerado}: {linha}")
+            print(f"\n[{index_linha + 1}] {token_gerado}: {linha}")
             
             if token_gerado != -1:
                 if token_gerado  == "tk_bloco_inicio":
@@ -318,19 +319,27 @@ def main():
                     else: 
                         escopos_variaveis = extrair_variaveis_tipos_valores_declaracao(linha)
                         if escopos_variaveis != -1:
-                            print(len(escopos_variaveis))
                             for escopo in escopos_variaveis:
-                                if verificar_declaracao_no_escopo_atual(escopo[1], pilha) != True:
-                                    novo_valor = escopo[3]
-                                    if novo_valor != None:
-                                        if (verifica_token_linha(escopo[2]) == converte_token_valor_para_tipo(novo_valor)):
+                                variavel_declarada_escopo_atual = verificar_declaracao_no_escopo_atual(escopo[1], pilha)
+                                if variavel_declarada_escopo_atual == False:
+                                    valor = escopo[3]
+                                    if valor != None:
+                                        if (verifica_token_linha(escopo[2]) == converte_token_valor_para_tipo(valor, pilha)):
                                             tabela_simbolos.append(escopo)
                                         else:
                                             imprimir_em_arquivo("Erro linha " + str(index_linha + 1) + ", tipos nao compativeis", arquivo_saida, index_linha)
                                     else:
                                         tabela_simbolos.append(escopo)
                                 else:
-                                    imprimir_em_arquivo("Erro linha " + str(index_linha + 1) + ", variavel ja declarada no bloco", arquivo_saida, index_linha)
+                                    if len(variavel_declarada_escopo_atual) > 4:
+                                        variavel_declarada_escopo_atual.pop()
+                                        valor = escopo[3]
+                                        linha_modificada = f"{variavel_declarada_escopo_atual[1]} = {valor}"
+                                        retorno_atribuicao = atribuir_valor_variavel(linha_modificada, pilha, token_gerado)
+                                        if retorno_atribuicao == -1:
+                                            imprimir_em_arquivo("Erro linha " + str(index_linha + 1) + ", tipos nao compativeis", arquivo_saida, index_linha)
+                                    else:
+                                        imprimir_em_arquivo("Erro linha " + str(index_linha + 1) + ", variavel ja declarada no bloco", arquivo_saida, index_linha)
                                     
                 elif token_gerado in tokens_atribuicao:
                     if len(pilha) < 1:
@@ -338,13 +347,9 @@ def main():
                     else:
                         variavel = verificar_declaracao_variavel(linha, pilha)
                         novo_valor_variavel = extrair_valor_variavel_atribuicao(linha)
-                        print("Variavel:")
-                        print(variavel)
-                        print(novo_valor_variavel)
                         if variavel != False:
                             if verificar_declaracao_no_escopo_atual(variavel[1], pilha) != False:
-                                print(converte_token_valor_para_tipo(novo_valor_variavel))
-                                if verifica_token_linha(variavel[2]) == converte_token_valor_para_tipo(novo_valor_variavel):
+                                if verifica_token_linha(variavel[2]) == converte_token_valor_para_tipo(novo_valor_variavel, pilha):
                                     retorno_atribuicao = atribuir_valor_variavel(linha, pilha, token_gerado)
                                     if retorno_atribuicao == -1:
                                         imprimir_em_arquivo("Erro linha " + str(index_linha + 1) + ", tipos nao compativeis", arquivo_saida, index_linha)
@@ -352,10 +357,9 @@ def main():
                                     imprimir_em_arquivo("Erro linha " + str(index_linha + 1) + ", tipos nao compativeis", arquivo_saida, index_linha)
                             else:
                                 if verifica_token_linha(variavel[3]) == verifica_token_linha(novo_valor_variavel):
-                                    print(pilha)
                                     variavel_aux = copy.deepcopy(variavel) 
                                     variavel_aux[3] = novo_valor_variavel
-                                    print(pilha)
+                                    variavel_aux.append("copia-atribuicao")
                                     tabela_simbolos.append(variavel_aux)
                                 else:
                                     imprimir_em_arquivo("Erro linha " + str(index_linha + 1) + ", tipos nao compativeis", arquivo_saida, index_linha)

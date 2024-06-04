@@ -4,4 +4,5 @@ NUMERO a=-0.28, c
 	PRINT b 
 	PRINT c 
 	c=a
+	PRINT c
 FIM _principal_
