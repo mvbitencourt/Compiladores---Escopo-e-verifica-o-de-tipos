@@ -1,10 +1,7 @@
 BLOCO _principal_ 
-NUMERO a=10
-PRINT a
-BLOCO _n1_
-a=5
-PRINT a
-FIM _n1_
-PRINT a
+NUMERO a=-0.28, c
+	PRINT a 
+	PRINT b 
+	PRINT c 
+	c=a
 FIM _principal_
-PRINT a

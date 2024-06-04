@@ -1,11 +1,20 @@
-[6] 12345
-[10] Erro linha 10, variavel ja declarada no bloco
-[11] 45
-[15] "Compiladores"
-[18] 45
-[21] Erro linha 21, tipos nao compativeis
-[22] 45
-[25] None
-[27] "Hello"
-[29] 10
-[35] 12345
+[5] 20
+[6] 10
+[8] Erro linha 8, tipos nao compativeis
+[9] "Ola mundo"
+[14] 20
+[15] -0.45
+[20] 10
+[21] "Compiladores"
+[23] Erro linha 23, variavel ja declarada no bloco
+[24] 11
+[25] Erro linha 25, variavel nao declarada
+[28] -0.28
+[29] "Compiladores"
+[30] None
+[31] Erro linha 31, tipos nao compativeis
+[32] None
+[34] 40
+[35] None
+[38] Erro linha 38, variavel nao declarada
+[39] 10
