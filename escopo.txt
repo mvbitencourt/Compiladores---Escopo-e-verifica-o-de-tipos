@@ -1,8 +1,6 @@
 BLOCO _principal_ 
-NUMERO a=-0.28, c
-	PRINT a 
-	PRINT b 
-	PRINT c 
-	c=a
-	PRINT c
+BLOCO _n1_
+BLOCO _n2_
+FIM _n2
+FIM _n1
 FIM _principal_

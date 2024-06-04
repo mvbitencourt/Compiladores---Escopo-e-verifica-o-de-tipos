@@ -1,6 +1,6 @@
 BLOCO _principal_ 
 	NUMERO
-	NUMERO a = 12345
+	NUMERO a = "oi"
 	CADEIA b = 10
 	NUMERO c = "cadeia"
 	PRINT a

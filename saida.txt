@@ -1,18 +1,16 @@
-[5] 20
-[6] 10
-[8] Erro linha 8, tipos nao compativeis
-[9] "Ola mundo"
-[14] 20
-[15] -0.45
-[20] 10
-[21] "Compiladores"
-[24] "Bloco2"
-[25] Erro linha 25, variavel nao declarada
-[28] -0.28
-[29] "Compiladores"
-[30] None
-[32] -0.28
-[34] 40
-[35] -0.28
-[38] Erro linha 38, variavel nao declarada
-[39] 10
+[2] Erro linha 2, comando mal utilizado
+[3] Erro linha 3, tipos nao compativeis
+[4] Erro linha 4, tipos nao compativeis
+[5] Erro linha 5, tipos nao compativeis
+[6] Erro linha 6, variavel nao declarada
+[9] Erro linha 9, variavel nao declarada
+[11] 25
+[15] "Compiladores"
+[18] 25
+[21] Erro linha 21, tipos nao compativeis
+[22] 25
+[25] None
+[27] "Hello"
+[28] Erro linha 28, tipos nao compativeis
+[29] "Hello"
+[35] Erro linha 35, variavel nao declarada

@@ -5,6 +5,9 @@ BLOCO _principal_
 		a_1=45
 		b=55
 
+		PRINT a_1
+		PRINT b
+
 		NUMERO nova=10
 	FIM _n1_
 
@@ -30,7 +33,9 @@ BLOCO _principal_
 			PRINT x
 			PRINT c
 			PRINT a
+			PRINT a_1
 			NUMERO a=81
+			PRINT a
 		FIM _n4_
 		PRINT a
 	FIM _n3_
