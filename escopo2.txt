@@ -1,13 +1,9 @@
 BLOCO _principal_ 
-	NUMERO a_1 = 12345, b, c=0.2345
-	CADEIA x=""
-	x=a
+	NUMERO a_1 = 12345, b
 
 	BLOCO _n1_ 
 		a_1=45
 		b=55
-		c=25
-		x=15
 
 		NUMERO nova=10
 	FIM _n1_
