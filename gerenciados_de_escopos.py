@@ -144,15 +144,6 @@ def extrair_tipo_variavel(variavel, pilha):
                 return simbolo[2]
     return False
 
-# EXCLUIR
-def extrair_variavel_atribuicao(linha):
-    variavel = linha.split()[0]  # Pega a primeira palavra da linha
-    padrao_ER = ER_DICIONARIO["ER_IDENTIFICADOR"]
-
-    if re.match(padrao_ER, variavel):
-        return variavel
-    return -1
-
 def extrair_valor_variavel_atribuicao(linha):
     # Separar a linha na posição do '=' e pegar a parte direita
     valor = linha.split('=')[1].strip()
@@ -261,20 +252,6 @@ def atribuir_valor_variavel(linha, pilha, token):
         
     return False
 
-def atualiza_tabela_declaracao(tabela_simbolos, nome_variavel, tipo_variavel, valor_inicial):
-    if nome_variavel in tabela_simbolos:
-        raise ValueError(f"Erro: Variável '{nome_variavel}' já declarada neste escopo.")
-    
-    tabela_simbolos[nome_variavel] = {
-        'tipo': tipo_variavel,
-        'valor': valor_inicial
-    }
-        
-def atualizar_pilha(pilha, tabela_simbolos):
-    if pilha:
-        pilha[-1] = tabela_simbolos  # Atualiza a pilha com a versão mais recente da tabela
-    return pilha
-
 def remover_todos_espacos(linha):
     return re.sub(r'\s+', '', linha)
 
@@ -302,8 +279,10 @@ def main():
 
             token_gerado = verifica_token_linha(linha)
             
-            print(f"\n[{index_linha + 1}] {token_gerado}: {linha}")
-            print(token_gerado)
+            if token_gerado == -1:
+                print(f"\n[{index_linha + 1}] Linha vazia: {linha}")
+            else:
+                print(f"\n[{index_linha + 1}] {token_gerado}: {linha}")
             
             if token_gerado != -1:
                 if token_gerado  == "tk_bloco_inicio":
@@ -344,9 +323,7 @@ def main():
                         imprimir_em_arquivo("Erro linha " + str(index_linha + 1) + ", atribuicao de variavel fora de bloco", arquivo_saida, index_linha)
                     else:
                         variavel = verificar_declaracao_variavel(linha, pilha)
-                        print(variavel)
                         novo_valor_variavel = extrair_valor_variavel_atribuicao(linha)
-                        print(novo_valor_variavel)
                         if variavel != False:
                             if verificar_declaracao_no_escopo_atual(variavel[1], pilha) != False:
                                 if verifica_token_linha(variavel[2]) == converte_token_valor_para_tipo(novo_valor_variavel, pilha):
@@ -391,6 +368,6 @@ def main():
                 elif token_gerado == "tk_identificador":
                     imprimir_em_arquivo("Erro linha " + str(index_linha + 1) + ", variavel sem atribuicao", arquivo_saida, index_linha)
 
-            print(f"PILHA: {pilha}")
+            print(f"      PILHA: {pilha}")
 
 main()
