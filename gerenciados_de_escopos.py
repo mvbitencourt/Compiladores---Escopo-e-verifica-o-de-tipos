@@ -1,12 +1,10 @@
 import re
 import copy
 
-comandos = ["BLOCO", "FIM", "NUMERO", "CADEIA", "PRINT"]
-
 # Dicionário de Expressões Regulares
 ER_DICIONARIO = {
-    "ER_BLOCO_INICIO": r"\s*BLOCO \w+",  # Corresponde ao início de um bloco com qualquer palavra e espaços no início
-    "ER_BLOCO_FIM": r"\s*FIM \w+",       # Corresponde ao fim de um bloco com qualquer palavra e espaços no início
+    "ER_BLOCO_INICIO": r"\s*BLOCO _\w+_",  # Corresponde ao início de um bloco com qualquer palavra e espaços no início
+    "ER_BLOCO_FIM": r"\s*FIM _\w+_",       # Corresponde ao fim de um bloco com qualquer palavra e espaços no início
     "ER_TIPO_NUMERO": r"\s*NUMERO",      # Corresponde ao tipo NUMERO com espaços no início
     "ER_TIPO_CADEIA": r"\s*CADEIA",      # Corresponde ao tipo CADEIA com espaços no início
     "ER_IDENTIFICADOR": r"\s*[a-zA-Z_][a-zA-Z0-9_]*",  # Corresponde a identificadores de variáveis com espaços no início
@@ -61,6 +59,8 @@ tokens_atribuicao = [
             "tk_atribuicao_cadeia",
             "tk_atribuicao_variavel",
 ]
+
+comandos = ["BLOCO", "FIM", "NUMERO", "CADEIA", "PRINT"]
 
 def converte_token_valor_para_tipo(valor, pilha):
     # Lista de expressões regulares ordenadas pela prioridade de verificação
@@ -264,7 +264,7 @@ def limpar_arquivo_saida(arquivo_saida):
         arquivo.write("")
 
 def main():
-    nome_arquivo = "escopo3.txt" # Nome do arquivo a ser lido
+    nome_arquivo = "escopo1.txt" # Nome do arquivo a ser lido
     arquivo_saida = "saida.txt"
     index_linha = -1
     pilha = []
