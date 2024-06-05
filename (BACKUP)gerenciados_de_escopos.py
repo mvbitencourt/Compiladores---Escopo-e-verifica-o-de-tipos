@@ -1,4 +1,5 @@
 import re
+import copy
 
 comandos = ["BLOCO", "FIM", "NUMERO", "CADEIA", "PRINT"]
 
@@ -26,7 +27,7 @@ ER_DICIONARIO = {
     "ER_ATRIBUICAO_VARIAVEL": fr"\s*{r'[a-zA-Z_][a-zA-Z0-9_]*'}\s*=\s*{r'[a-zA-Z_][a-zA-Z0-9_]*'}",  # Atribuição de uma variável a outra variável com espaços no início
 
     # Comandos PRINT
-    "ER_PRINT": fr"\s*PRINT\s*{r'[a-zA-Z_][a-zA-Z0-9_]*'}"  # Corresponde ao comando PRINT com espaços no início
+    "ER_PRINT": fr"\s*PRINT\s*{r'[a-zA-Z_][a-zA-Z0-9_]*'}",  # Corresponde ao comando PRINT com espaços no início
 }
 
 # Lista de Tokens
@@ -61,7 +62,46 @@ tokens_atribuicao = [
             "tk_atribuicao_variavel",
 ]
 
-def verifica_token(linha):
+def converte_token_valor_para_tipo(valor, pilha):
+    # Lista de expressões regulares ordenadas pela prioridade de verificação
+    ordem_prioridade = [
+        "ER_DECLARACAO_NUMERO_INICIALIZADA",
+        "ER_DECLARACAO_CADEIA_INICIALIZADA",
+        "ER_DECLARACAO_NUMERO",
+        "ER_DECLARACAO_CADEIA",
+        "ER_ATRIBUICAO_NUMERO",
+        "ER_ATRIBUICAO_CADEIA",
+        "ER_ATRIBUICAO_VARIAVEL",
+        "ER_PRINT",
+        "ER_BLOCO_INICIO",
+        "ER_BLOCO_FIM",
+        "ER_TIPO_NUMERO",
+        "ER_TIPO_CADEIA",
+        "ER_IDENTIFICADOR",
+        "ER_NUMERO",
+        "ER_CADEIA"
+    ]
+
+    # Verificar cada expressão regular na ordem de prioridade
+    for nome_ER in ordem_prioridade:
+        padrao_ER = ER_DICIONARIO[nome_ER]
+        if re.match(padrao_ER, valor):
+            for token in tokens:
+                if token[1] == nome_ER:
+                    if nome_ER == "ER_NUMERO":
+                        return tokens[2][0]
+                    elif nome_ER == "ER_CADEIA":
+                        return tokens[3][0]
+                    elif nome_ER == "ER_IDENTIFICADOR":
+                        tipo = extrair_tipo_variavel(valor, pilha)
+                        if tipo == "NUMERO":
+                            return tokens[2][0]
+                        elif tipo == "CADEIA":
+                            return tokens[3][0]
+                    return token[0]
+    return -1
+
+def verifica_token_linha(linha):
     # Lista de expressões regulares ordenadas pela prioridade de verificação
     ordem_prioridade = [
         "ER_DECLARACAO_NUMERO_INICIALIZADA",
@@ -96,13 +136,18 @@ def extrair_tipo_variavel_declaracao(linha):
         return tipo_variavel
     return -1
 
-def extrair_variavel_atribuicao(linha):
-    variavel = linha.split()[0]  # Pega a primeira palavra da linha
-    padrao_ER = ER_DICIONARIO["ER_IDENTIFICADOR"]
+def extrair_tipo_variavel(variavel, pilha):
+    
+    for tabela in reversed(pilha):
+        for simbolo in tabela:
+            if simbolo[1] == variavel:
+                return simbolo[2]
+    return False
 
-    if re.match(padrao_ER, variavel):
-        return variavel
-    return -1
+def extrair_valor_variavel_atribuicao(linha):
+    # Separar a linha na posição do '=' e pegar a parte direita
+    valor = linha.split('=')[1].strip()
+    return valor
 
 def extrair_variaveis_tipos_valores_declaracao(linha):
     tipo_variavel = extrair_tipo_variavel_declaracao(linha)
@@ -124,33 +169,8 @@ def extrair_variaveis_tipos_valores_declaracao(linha):
         else:
             variavel = parte
             valor = None  # Valor não inicializado
-        token = verifica_token(variavel)
+        token = verifica_token_linha(variavel)
         variaveis_tipos_valores.append([token, variavel, tipo_variavel, valor])
-    
-    return variaveis_tipos_valores
-
-def extrair_variaveis_tipos_valores_atribuicao(linha):
-    variavel = extrair_variavel_atribuicao(linha)
-    if variavel == -1:
-        raise ValueError("variável não reconhecido na linha: " + linha)
-    
-    variaveis_tipos_valores = []
-
-    # Remover o tipo da linha
-    linha_sem_tipo = linha[len(variavel):].strip()
-
-    # Dividir a linha em partes separadas por vírgula
-    partes = linha_sem_tipo.split(',')
-
-    for parte in partes:
-        parte = parte.strip()
-        if '=' in parte:
-            variavel, valor = map(str.strip, parte.split('='))
-        else:
-            variavel = parte
-            valor = None  # Valor não inicializado
-        token = verifica_token(variavel)
-        variaveis_tipos_valores.append([token, variavel, variavel, valor])
     
     return variaveis_tipos_valores
 
@@ -193,11 +213,9 @@ def verificar_declaracao_no_escopo_atual(variavel, pilha):
         return False
     
     escopo_atual = pilha[-1]
-    print("ESCPO ATUAL")
-    print(escopo_atual)
     for simbolo in escopo_atual:
         if simbolo[1] == variavel:
-            return True
+            return simbolo
     
     return False
 
@@ -205,6 +223,8 @@ def atribuir_valor_variavel(linha, pilha, token):
     if token != 'tk_atribuicao_variavel':
         # Separar a variável e o novo valor
         nome_variavel, novo_valor = map(str.strip, linha.split('='))
+        #nome_variavel = remover_todos_espacos(nome_variavel)
+        #novo_valor = remover_todos_espacos(novo_valor)
         
         # Procurar na pilha a variável e atualizar seu valor
         for tabela in reversed(pilha):
@@ -212,6 +232,7 @@ def atribuir_valor_variavel(linha, pilha, token):
                 if simbolo[1] == nome_variavel:
                     tabela[indice][3] = novo_valor
                     return True
+
     else:
         # Separar a variável e o novo valor
         nome_variavel, novo_valor = map(str.strip, linha.split('='))
@@ -231,49 +252,8 @@ def atribuir_valor_variavel(linha, pilha, token):
         
     return False
 
-def atualiza_tabela_simbolos(linha, tabela_simbolos):
-    variaveis_tipos_valores = extrair_variaveis_tipos_valores_atribuicao(linha)
-    for token, variavel, tipo_variavel, valor in variaveis_tipos_valores:
-        encontrado = False
-        for simbolo in tabela_simbolos:
-            if simbolo[0] == variavel:
-                if simbolo[1] == tipo_variavel:
-                    simbolo[2] = valor
-                else:
-                    return -2
-                encontrado = True
-        if not encontrado:
-            return -1
-        elif encontrado:
-            return tabela_simbolos     
-
-def atualiza_tabela_declaracao(tabela_simbolos, nome_variavel, tipo_variavel, valor_inicial):
-    if nome_variavel in tabela_simbolos:
-        raise ValueError(f"Erro: Variável '{nome_variavel}' já declarada neste escopo.")
-    
-    tabela_simbolos[nome_variavel] = {
-        'tipo': tipo_variavel,
-        'valor': valor_inicial
-    }
-
-def verificar_tipo_erro(linha, comandos):
-    for comando in comandos:
-        if comando in linha:
-            if comandos.index(comando) < 2:
-                return f"comando '{comando}' mal utilizado"
-            elif 1 < comandos.index(comando) < 4:
-                return f"inconsistencia de tipagem"
-            else:
-                # PROBLEMAS DE DECLARAÇÃO DE VARIAVEL
-                return
-        else:
-            # PROBLEMAS DE ATRIBUIÇÃO
-            return
-        
-def atualizar_pilha(pilha, tabela_simbolos):
-    if pilha:
-        pilha[-1] = tabela_simbolos  # Atualiza a pilha com a versão mais recente da tabela
-    return pilha
+def remover_todos_espacos(linha):
+    return re.sub(r'\s+', '', linha)
 
 def imprimir_em_arquivo(cadeia, arquivo_saida, index_linha):
     with open(arquivo_saida, "a") as arquivo:
@@ -284,14 +264,11 @@ def limpar_arquivo_saida(arquivo_saida):
         arquivo.write("")
 
 def main():
-    nome_arquivo = "escopo1.txt" # Nome do arquivo a ser lido
+    nome_arquivo = "escopo3.txt" # Nome do arquivo a ser lido
     arquivo_saida = "saida.txt"
-    linhas = [] # Inicializa uma lista vazia para armazenar as linhas
     index_linha = -1
-    erro = ""
     pilha = []
     tabela_simbolos = []
-    bloco_aberto = False
 
     limpar_arquivo_saida(arquivo_saida)
 
@@ -300,9 +277,12 @@ def main():
             linha = linha.lstrip()
             index_linha += 1
 
-            token_gerado = verifica_token(linha)
+            token_gerado = verifica_token_linha(linha)
             
-            print(f"[{index_linha}] {token_gerado}: {linha}")
+            if token_gerado == -1:
+                print(f"\n[{index_linha + 1}] Linha vazia: {linha}")
+            else:
+                print(f"\n[{index_linha + 1}] {token_gerado}: {linha}")
             
             if token_gerado != -1:
                 if token_gerado  == "tk_bloco_inicio":
@@ -314,31 +294,63 @@ def main():
                     if len(pilha) < 1:
                         imprimir_em_arquivo("Erro linha " + str(index_linha + 1) + ", declaracao de variavel fora de bloco", arquivo_saida, index_linha)
                     else: 
-                        #if verificar_declaracao_variavel(linha, pilha) == False:
                         escopos_variaveis = extrair_variaveis_tipos_valores_declaracao(linha)
-                        print("ESCOPO:")
-                        print(escopos_variaveis)
                         if escopos_variaveis != -1:
                             for escopo in escopos_variaveis:
-                                if verificar_declaracao_no_escopo_atual(escopo[1], pilha) != True:
-                                    tabela_simbolos.append(escopo)
+                                variavel_declarada_escopo_atual = verificar_declaracao_no_escopo_atual(escopo[1], pilha)
+                                if variavel_declarada_escopo_atual == False:
+                                    valor = escopo[3]
+                                    if valor != None:
+                                        if (verifica_token_linha(escopo[2]) == converte_token_valor_para_tipo(valor, pilha)):
+                                            tabela_simbolos.append(escopo)
+                                        else:
+                                            imprimir_em_arquivo("Erro linha " + str(index_linha + 1) + ", tipos nao compativeis", arquivo_saida, index_linha)
+                                    else:
+                                        tabela_simbolos.append(escopo)
                                 else:
-                                    imprimir_em_arquivo("Erro linha " + str(index_linha + 1) + ", variavel ja declarada no bloco", arquivo_saida, index_linha)
+                                    if len(variavel_declarada_escopo_atual) > 4: # Verifica se declaração veio de uma atribuição 
+                                        variavel_declarada_escopo_atual.pop()
+                                        valor = escopo[3]
+                                        linha_modificada = f"{variavel_declarada_escopo_atual[1]} = {valor}"
+                                        retorno_atribuicao = atribuir_valor_variavel(linha_modificada, pilha, token_gerado)
+                                        if retorno_atribuicao == -1:
+                                            imprimir_em_arquivo("Erro linha " + str(index_linha + 1) + ", tipos nao compativeis", arquivo_saida, index_linha)
+                                    else:
+                                        imprimir_em_arquivo("Erro linha " + str(index_linha + 1) + ", variavel ja declarada no bloco", arquivo_saida, index_linha)
                                     
                 elif token_gerado in tokens_atribuicao:
                     if len(pilha) < 1:
                         imprimir_em_arquivo("Erro linha " + str(index_linha + 1) + ", atribuicao de variavel fora de bloco", arquivo_saida, index_linha)
                     else:
-                        if verificar_declaracao_variavel(linha, pilha) != False:
-                            variavel = verificar_declaracao_variavel(linha, pilha)
-                            retorno_atribuicao = atribuir_valor_variavel(linha, pilha, token_gerado)
-                            if retorno_atribuicao == -1:
-                                imprimir_em_arquivo("Erro linha " + str(index_linha + 1) + ", tipos nao compativeis", arquivo_saida, index_linha)
+                        variavel = verificar_declaracao_variavel(linha, pilha)
+                        novo_valor_variavel = extrair_valor_variavel_atribuicao(linha)
+                        if variavel != False:
+                            if verificar_declaracao_no_escopo_atual(variavel[1], pilha) != False:
+                                if verifica_token_linha(variavel[2]) == converte_token_valor_para_tipo(novo_valor_variavel, pilha):
+                                    retorno_atribuicao = atribuir_valor_variavel(linha, pilha, token_gerado)
+                                    if retorno_atribuicao == -1:
+                                        imprimir_em_arquivo("Erro linha " + str(index_linha + 1) + ", tipos nao compativeis", arquivo_saida, index_linha)
+                                else:
+                                    imprimir_em_arquivo("Erro linha " + str(index_linha + 1) + ", tipos nao compativeis", arquivo_saida, index_linha)
+                            else:
+                                if variavel[3] != None:
+                                    if verifica_token_linha(variavel[3]) == verifica_token_linha(novo_valor_variavel):
+                                        variavel_aux = copy.deepcopy(variavel) 
+                                        variavel_aux[3] = novo_valor_variavel
+                                        variavel_aux.append("copia-atribuicao")
+                                        tabela_simbolos.append(variavel_aux)
+                                    else:
+                                        imprimir_em_arquivo("Erro linha " + str(index_linha + 1) + ", tipos nao compativeis", arquivo_saida, index_linha)
+                                else:
+                                    variavel_aux = copy.deepcopy(variavel) 
+                                    variavel_aux[3] = novo_valor_variavel
+                                    variavel_aux.append("copia-atribuicao")
+                                    tabela_simbolos.append(variavel_aux)
                         else:
                             imprimir_em_arquivo("Erro linha " + str(index_linha + 1) + ", variavel nao declarada", arquivo_saida, index_linha)
                 elif token_gerado == "tk_print":
                     if len(pilha) < 1:
-                        imprimir_em_arquivo("Erro linha " + str(index_linha + 1) + ", declaracao de variavel fora de bloco", arquivo_saida, index_linha)
+                        imprimir_em_arquivo("Erro linha " + str(index_linha + 1) + ", print fora de bloco", arquivo_saida, index_linha)
                     else:
                         variaveis_print = extrair_variaveis_print(linha)
                         for variavel in variaveis_print:
@@ -346,8 +358,16 @@ def main():
                             if valor_variavel != -1:
                                 imprimir_em_arquivo(valor_variavel, arquivo_saida, index_linha)
                             else:
-                                imprimir_em_arquivo("Erro linha " + str(index_linha + 1) + ", variavel nao declarada", arquivo_saida, index_linha)
-                            
-            print(f"PILHA: {pilha}")
+                                imprimir_em_arquivo("Erro linha " + str(index_linha + 1) + ", variavel nao declarada", arquivo_saida, index_linha)           
+                elif token_gerado == "tk_tipo_numero" or token_gerado == "tk_tipo_cadeia":
+                    imprimir_em_arquivo("Erro linha " + str(index_linha + 1) + ", comando mal utilizado", arquivo_saida, index_linha)
+                elif token_gerado == "tk_numero":
+                    imprimir_em_arquivo("Erro linha " + str(index_linha + 1) + ", numero sem atibuicao", arquivo_saida, index_linha)
+                elif token_gerado == "tk_cadeia":
+                    imprimir_em_arquivo("Erro linha " + str(index_linha + 1) + ", cadeia sem atribuicao", arquivo_saida, index_linha)
+                elif token_gerado == "tk_identificador":
+                    imprimir_em_arquivo("Erro linha " + str(index_linha + 1) + ", variavel sem atribuicao", arquivo_saida, index_linha)
+
+            print(f"      PILHA: {pilha}")
 
 main()
