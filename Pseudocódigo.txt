@@ -1,0 +1,214 @@
+// Inicializações
+
+// Definir Dicionário de Expressões Regulares
+Definir ER_DICIONARIO com padrões de expressões regulares para identificar:
+    - Início de blocos
+    - Fim de blocos
+    - Tipos (NUMERO, CADEIA)
+    - Identificadores
+    - Números e cadeias
+    - Declarações de variáveis
+    - Atribuições de variáveis
+    - Comandos PRINT
+
+// Definir Lista de Tokens
+Definir tokens com pares de nomes e expressões regulares
+
+// Definir Listas de Tokens de Declaração e Atribuição
+Definir tokens_declaracao com tokens de declaração de variáveis
+Definir tokens_atribuicao com tokens de atribuição de variáveis
+
+// Funções Auxiliares
+
+Função converte_token_valor_para_tipo(valor, pilha)
+    Para cada expressão regular em ordem de prioridade
+        Se valor corresponder ao padrão de expressão regular
+            Retornar o token correspondente
+    Retornar -1
+
+Função verifica_token_linha(linha)
+    Para cada expressão regular em ordem de prioridade
+        Se linha corresponder ao padrão de expressão regular
+            Retornar o token correspondente
+    Retornar -1
+
+Função extrair_tipo_variavel_declaracao(linha)
+    Extrair a primeira palavra da linha como tipo_variavel
+    Se tipo_variavel for "NUMERO" ou "CADEIA"
+        Retornar tipo_variavel
+    Retornar -1
+
+Função extrair_tipo_variavel(variavel, pilha)
+    Para cada tabela na pilha em ordem reversa
+        Para cada símbolo na tabela
+            Se o símbolo corresponder à variável
+                Retornar o tipo do símbolo
+    Retornar False
+
+Função extrair_valor_variavel_atribuicao(linha)
+    Separar linha na posição do '=' e pegar a parte direita
+    Retornar o valor
+
+Função extrair_variaveis_tipos_valores_declaracao(linha)
+    Extrair tipo_variavel da linha
+    Se tipo_variavel for inválido
+        Retornar -1
+    
+    Inicializar variaveis_tipos_valores como lista vazia
+    
+    Remover tipo da linha
+    Dividir a linha em partes separadas por vírgula
+    
+    Para cada parte
+        Se houver atribuição na parte
+            Separar variável e valor
+        Caso contrário
+            Definir valor como None
+        Adicionar [token, variável, tipo_variavel, valor] à lista variaveis_tipos_valores
+    
+    Retornar variaveis_tipos_valores
+
+Função extrair_variaveis_print(linha)
+    Se linha começar com "PRINT"
+        Remover "PRINT" e dividir por vírgula
+        Remover espaços em branco de cada parte
+        Retornar lista de variáveis
+    Retornar None
+
+Função obter_valor_variavel(variavel, pilha)
+    Para cada tabela na pilha em ordem reversa
+        Para cada linha na tabela
+            Para cada símbolo na linha
+                Se o símbolo corresponder à variável
+                    Retornar o valor da variável
+    Retornar -1
+
+Função obter_tipo_variavel(variavel, pilha)
+    Para cada tabela na pilha em ordem reversa
+        Para cada linha na tabela
+            Para cada símbolo na linha
+                Se o símbolo corresponder à variável
+                    Retornar o tipo da variável
+    Retornar -1
+
+Função verificar_declaracao_variavel(linha, pilha)
+    Separar o nome da variável da linha
+    Para cada tabela na pilha em ordem reversa
+        Para cada símbolo na tabela
+            Se o símbolo corresponder à variável
+                Retornar o símbolo correspondente
+    Retornar False
+
+Função verificar_declaracao_no_escopo_atual(variavel, pilha)
+    Se pilha estiver vazia
+        Retornar False
+    
+    Obter escopo atual do topo da pilha
+    Para cada símbolo no escopo atual
+        Se o símbolo corresponder à variável
+            Retornar o símbolo correspondente
+    
+    Retornar False
+
+Função atribuir_valor_variavel(linha, pilha, token)
+    Se token não for 'tk_atribuicao_variavel'
+        Separar variável e novo valor
+        Para cada tabela na pilha em ordem reversa
+            Para cada símbolo na tabela
+                Se o símbolo corresponder à variável
+                    Atualizar o valor do símbolo
+                    Retornar True
+    Caso contrário
+        Separar variável e novo valor
+        Obter valor da variável
+        Obter tipo da variável
+        
+        Para cada tabela na pilha em ordem reversa
+            Para cada símbolo na tabela
+                Se o símbolo corresponder à variável
+                    Se o tipo for compatível
+                        Atualizar o valor do símbolo
+                        Retornar True
+                    Caso contrário
+                        Retornar -1
+    
+    Retornar False
+
+Função remover_todos_espacos(linha)
+    Remover todos os espaços da linha
+
+Função imprimir_em_arquivo(cadeia, arquivo_saida, index_linha)
+    Abrir arquivo em modo de adição
+    Escrever a cadeia no arquivo com o índice da linha
+
+Função limpar_arquivo_saida(arquivo_saida)
+    Abrir arquivo em modo de escrita
+    Limpar o conteúdo do arquivo
+
+// Função Principal
+
+Função main()
+    Definir nome_arquivo e arquivo_saida
+    Inicializar index_linha, pilha e tabela_simbolos
+    Limpar o conteúdo do arquivo de saída
+    Abrir arquivo de entrada em modo de leitura
+    
+    Para cada linha no arquivo
+        Remover espaços em branco no início da linha
+        Incrementar index_linha
+        Verificar qual token corresponde à linha
+        
+        Se token gerado for -1
+            Imprimir linha vazia
+        Caso contrário
+            Imprimir token gerado e linha correspondente
+
+        Se token gerado for válido
+            Se token gerado for início de bloco
+                Inicializar nova tabela de símbolos e adicionar à pilha
+            Se token gerado for fim de bloco
+                Remover a tabela de símbolos do topo da pilha
+            Se token gerado for declaração de variável
+                Se pilha estiver vazia
+                    Imprimir erro de declaração fora de bloco
+                Caso contrário
+                    Extrair variáveis, tipos e valores da linha de declaração
+                    Se extração for bem-sucedida
+                        Para cada variável, tipo e valor extraído
+                            Verificar se a variável está declarada no escopo atual
+                            Se não estiver declarada no escopo atual
+                                Verificar compatibilidade de tipos
+                                Adicionar à tabela de símbolos
+                            Caso contrário
+                                Verificar se a declaração veio de uma atribuição
+                                Se veio de uma atribuição
+                                    Remover flag de cópia
+                                    Criar nova linha de atribuição
+                                    Atribuir novo valor à variável
+                                Caso contrário
+                                    Imprimir erro de variável já declarada no bloco
+
+            Se token gerado for atribuição de variável
+                Se pilha estiver vazia
+                    Imprimir erro de atribuição fora de bloco
+                Caso contrário
+                    Verificar se a variável foi declarada
+                    Extrair novo valor da variável
+                    Se variável foi encontrada
+                        Verificar se a variável foi declarada no escopo atual
+                        Verificar compatibilidade de tipos
+                        Atribuir novo valor à variável
+
+            Se token gerado for comando PRINT
+                Se pilha estiver vazia
+                    Imprimir erro de PRINT fora de bloco
+                Caso contrário
+                    Extrair variáveis do comando PRINT
+                    Para cada variável a ser impressa
+                        Obter valor da variável
+                        Imprimir valor da variável ou erro de variável não declarada
+
+            Imprimir estado atual da pilha
+
+// Chamar a função main para executar o programa
+main()

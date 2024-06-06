@@ -1,6 +1,0 @@
-BLOCO _principal_ 
-BLOCO _n1_
-BLOCO _n2_
-FIM _n2
-FIM _n1
-FIM _principal_
